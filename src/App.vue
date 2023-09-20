@@ -86,7 +86,7 @@ import axios from 'axios'
           },
           {
             id: 11,
-            text: 'URL',
+            text: 'URL'
           }
         ],
         snackbar: {
