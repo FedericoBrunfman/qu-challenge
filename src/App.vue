@@ -23,7 +23,7 @@
           </v-col>
         </v-row>
         <v-row  align="start" v-for="(planet, i) in planets" :class="{ 'planet-list__odd-row': i % 2 !== 0 }">
-          <v-col cols="1" v-for="(characteristic, j) in planets[i]">
+          <v-col class="planet-list__col"  cols="1" v-for="(characteristic, j) in planets[i]">
               <a class="planet-list__link" v-if="j === planets.length" :href="characteristic" target="_blank">{{ characteristic }}</a>
               <div v-else>{{ characteristic }}</div>
           </v-col>
@@ -149,6 +149,7 @@ import axios from 'axios'
   main {
     overflow: auto;
     font-size: 12px;
+    min-width: 900px;
   }
   &__header {
     background-color: rgb(50, 49, 49);
@@ -165,6 +166,14 @@ import axios from 'axios'
   }
   &__icon {
     cursor: pointer;
+  }
+
+  @media (max-width: 1300px) {
+    &__col {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;      
+    }
   }
 }
 </style>
