@@ -2,23 +2,31 @@
   <v-dialog class="custom-dialog" v-model="onOpenDialog" width="800">
     <v-card>
       <v-card-title>Extra information:</v-card-title>
-      <v-card-text>
-        <v-row align="center" class="custom-dialog__header">
-          <v-col cols="3" v-for="header in headers" :key="header">
-            <div>{{ header.toUpperCase() }}</div>
-          </v-col>
-        </v-row>
-        <v-row align="center" v-for="(item, i) in content" :key="item.name" :class="{ 'custom-dialog__odd-row': i % 2 !== 0 }">
-          <v-col cols="3" v-for="characteristic in item" :key="characteristic">
-            <div>{{ characteristic }}</div>
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" block @click="openDialog = false"
-          >Close</v-btn
-        >
-      </v-card-actions>
+      <div
+        v-if="loadingDialog"
+        class="d-flex align-center justify-center my-10"
+      >
+        <v-progress-circular indeterminate color="primary" />
+      </div>      
+      <div v-else>
+        <v-card-text>
+          <v-row align="center" class="custom-dialog__header">
+            <v-col cols="3" v-for="header in headers" :key="header">
+              <div>{{ header.toUpperCase() }}</div>
+            </v-col>
+          </v-row>
+          <v-row align="center" v-for="(item, i) in content" :key="item.name" :class="{ 'custom-dialog__odd-row': i % 2 !== 0 }">
+            <v-col cols="3" v-for="characteristic in item" :key="characteristic">
+              <div>{{ characteristic }}</div>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" block @click="openDialog = false"
+            >Close</v-btn
+          >
+        </v-card-actions>      
+      </div>
     </v-card>
   </v-dialog>
 </template>
@@ -31,6 +39,10 @@ export default {
       required: true
     },
     openDialog: {
+      type: Boolean,
+      default: false
+    },
+    loadingDialog: {
       type: Boolean,
       default: false
     }

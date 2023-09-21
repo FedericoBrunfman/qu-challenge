@@ -61,7 +61,7 @@
           </v-col>
         </v-row>
       </v-container>
-      <custom-dialog :content="extraData" :openDialog="openDialog" />
+      <custom-dialog :content="extraData" :openDialog="openDialog" :loadingDialog="loadingDialog"/>
       <v-snackbar v-model="snackbar.show" :timeout="1000">
         {{ snackbar.text }}
       </v-snackbar>
@@ -89,6 +89,7 @@ export default {
       },
       direction: 1,
       extraData: [],
+      loadingDialog: false,
     };
   },
   async mounted() {
@@ -164,6 +165,8 @@ export default {
       });
     },
     async openExtraData(extraData) {
+      this.openDialog = true;
+      this.loadingDialog = true;
       await Promise.all(extraData.map((data) => axios.get(data))).then(
         (extraData) => {
           this.extraData = extraData.map((data) => {
@@ -184,7 +187,7 @@ export default {
           });
         }
       );
-      this.openDialog = true;
+      this.loadingDialog = false;
     },
   },
 };
