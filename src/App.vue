@@ -180,7 +180,7 @@ export default {
 .planet-list {
   main {
     overflow: auto;
-    font-size: 12px;
+    font-size: 13px;
     min-width: 900px;
   }
   &__header {
