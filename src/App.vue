@@ -43,7 +43,9 @@
             >
             <div v-else>
               <div
-                v-if="characteristic.extraData && characteristic.extraData.length"
+                v-if="
+                  characteristic.extraData && characteristic.extraData.length
+                "
               >
                 <div
                   class="planet-list__resident"
@@ -59,10 +61,7 @@
           </v-col>
         </v-row>
       </v-container>
-      <custom-dialog
-        :content="extraData"
-        :openDialog="openDialog"
-      />
+      <custom-dialog :content="extraData" :openDialog="openDialog" />
       <v-snackbar v-model="snackbar.show" :timeout="1000">
         {{ snackbar.text }}
       </v-snackbar>
@@ -167,7 +166,22 @@ export default {
     async openExtraData(extraData) {
       await Promise.all(extraData.map((data) => axios.get(data))).then(
         (extraData) => {
-          this.extraData = extraData.map((data) => data.data.name || data.data.title);
+          this.extraData = extraData.map((data) => {
+            const isResident = !!data.data.name;
+            if (isResident) {
+              return {
+                name: data.data.name,
+                height: data.data.height,
+                mass: data.data.mass,
+              };
+            } else {
+              return {
+                title: data.data.title,
+                director: data.data.director,
+                producer: data.data.producer,
+              };
+            }
+          });
         }
       );
       this.openDialog = true;
@@ -191,7 +205,7 @@ export default {
     font-weight: 900;
   }
   &__odd-row {
-    background-color: rgb(214, 214, 214);
+    background-color: #eaeaea;
   }
   &__loading {
     height: 500px;

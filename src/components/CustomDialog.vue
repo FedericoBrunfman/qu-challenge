@@ -1,9 +1,18 @@
 <template>
-  <v-dialog v-model="onOpenDialog" width="800">
+  <v-dialog class="custom-dialog" v-model="onOpenDialog" width="800">
     <v-card>
       <v-card-title>Extra information:</v-card-title>
       <v-card-text>
-        <v-list :items="content"></v-list>
+        <v-row align="center" class="custom-dialog__header">
+          <v-col cols="3" v-for="header in headers" :key="header">
+            <div>{{ header.toUpperCase() }}</div>
+          </v-col>
+        </v-row>
+        <v-row align="center" v-for="(item, i) in content" :key="item.name" :class="{ 'custom-dialog__odd-row': i % 2 !== 0 }">
+          <v-col cols="3" v-for="characteristic in item" :key="characteristic">
+            <div>{{ characteristic }}</div>
+          </v-col>
+        </v-row>
       </v-card-text>
       <v-card-actions>
         <v-btn color="primary" block @click="openDialog = false"
@@ -29,7 +38,22 @@ export default {
   computed: {
     onOpenDialog() {
       return this.openDialog;
+    },
+    headers () {
+      return Object.keys(this.content[0]);
     }
   }
 }
 </script>
+<style scoped lang="scss">
+.custom-dialog {
+  font-size: 13px;
+  &__header {
+    background-color: #eaeaea;
+    font-weight: bold;
+  }
+  &__odd-row {
+    background-color: #eaeaea;
+  }
+}
+</style>
