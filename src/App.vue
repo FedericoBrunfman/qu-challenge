@@ -60,55 +60,80 @@
             </div>
           </v-col>
         </v-row>
+        <v-progress-linear
+          v-if="progressLoading"
+          indeterminate
+          color="purple"
+        />
       </v-container>
-      <custom-dialog :content="extraData" :openDialog="openDialog" :loadingDialog="loadingDialog"/>
+      <custom-dialog
+        :content="extraData"
+        :openDialog="openDialog"
+        :loadingDialog="loadingDialog"
+        @update:openDialog="(value) => (openDialog = value)"
+      />
       <v-snackbar v-model="snackbar.show" :timeout="1000">
         {{ snackbar.text }}
       </v-snackbar>
     </main>
+    <v-pagination
+      class="mt-4"
+      :length="pageCount"
+      v-model="page"
+      @update:modelValue="getPlanets"
+    ></v-pagination>
   </div>
 </template>
-<script>
+<script lang="ts">
 import axios from "axios";
 import CustomDialog from "./components/CustomDialog.vue";
 import { HEADERS } from "./constants";
-export default {
+import { defineComponent } from "vue";
+export default defineComponent({
   name: "App",
   components: {
     CustomDialog,
   },
   data() {
     return {
-      planets: [],
-      loading: false,
-      openDialog: false,
-      headers: HEADERS,
+      planets: [] as Array<{
+        name: string;
+        data: Array<{
+          text: string;
+          extraData?: string[];
+        }>;
+      }>,
+      loading: false as boolean,
+      openDialog: false as boolean,
+      headers: HEADERS, // You might need to specify the type for HEADERS
       snackbar: {
         text: "Something went wrong. Please try again later.",
         show: false,
-      },
-      direction: 1,
-      extraData: [],
-      loadingDialog: false,
+      } as { text: string; show: boolean },
+      direction: 1 as number,
+      extraData: [] as Array<{
+        name?: string;
+        height?: string;
+        mass?: string;
+        title?: string;
+        director?: string;
+        producer?: string;
+      }>,
+      loadingDialog: false as boolean,
+      pageCount: 0 as number,
+      page: 1 as number,
+      progressLoading: false as boolean,
     };
   },
   async mounted() {
-    try {
-      this.loading = true;
-      await axios.get("https://swapi.dev/api/planets/").then((response) => {
-        this.planets = this.planetsMapped(response.data.results);
-        this.sortByName(this.direction);
-      });
-    } catch (error) {
-      this.snackbar.show = true;
-    } finally {
-      this.loading = false;
-    }
+    this.loading = true;
+    await this.getPlanets();
+    this.loading = false;
   },
   methods: {
-    sortByName(direction) {
+    sortByName(direction: number) {
       this.direction = direction;
-      this.planets.sort((a, b) => {
+      this.planets.sort((a: { name: number }, b: { name: number }) => {
         if (a.name < b.name) {
           return -1 * direction;
         }
@@ -118,56 +143,88 @@ export default {
         return 0;
       });
     },
-    planetsMapped(planets) {
-      return planets.map((planet) => {
-        return {
-          name: planet.name,
-          data: [
-            {
-              text: planet.name,
-            },
-            {
-              text: planet.rotation_period,
-            },
-            {
-              text: planet.orbital_period,
-            },
-            {
-              text: planet.diameter,
-            },
-            {
-              text: planet.climate,
-            },
-            {
-              text: planet.gravity,
-            },
-            {
-              text: planet.surface_water,
-            },
-            {
-              text: planet.population,
-            },
-            {
-              text: planet.residents.length
-                ? planet.residents.length
-                : "No residents",
-              extraData: planet.residents,
-            },
-            {
-              text: planet.films.length ? planet.films.length : "No films",
-              extraData: planet.films,
-            },
-            {
-              text: planet.url,
-            },
-          ],
-        };
-      });
+    planetsMapped(planets: any[]) {
+      return planets.map(
+        (planet: {
+          name: string;
+          rotation_period: string;
+          orbital_period: string;
+          diameter: string;
+          climate: string;
+          gravity: string;
+          surface_water: string;
+          population: string;
+          residents: string | string[];
+          films: string | string[];
+          url: string;
+        }) => {
+          return {
+            name: planet.name,
+            data: [
+              {
+                text: planet.name,
+              },
+              {
+                text: planet.rotation_period,
+              },
+              {
+                text: planet.orbital_period,
+              },
+              {
+                text: planet.diameter,
+              },
+              {
+                text: planet.climate,
+              },
+              {
+                text: planet.gravity,
+              },
+              {
+                text: planet.surface_water,
+              },
+              {
+                text: planet.population,
+              },
+              {
+                text: planet.residents.length
+                  ? planet.residents.length
+                  : "No residents",
+                extraData: planet.residents,
+              },
+              {
+                text: planet.films.length ? planet.films.length : "No films",
+                extraData: planet.films,
+              },
+              {
+                text: planet.url,
+              },
+            ],
+          };
+        }
+      );
     },
-    async openExtraData(extraData) {
+    async getPlanets() {
+      this.progressLoading = true;
+      try {
+        await axios
+          .get(`https://swapi.dev/api/planets/?page=${this.page}`)
+          .then((response) => {
+            this.planets = this.planetsMapped(response.data.results);
+            this.sortByName(this.direction);
+            this.pageCount = Math.ceil(
+              response.data.count / this.planets.length
+            );
+          });
+      } catch (error) {
+        this.snackbar.show = true;
+      } finally {
+        this.progressLoading = false;
+      }
+    },
+    async openExtraData(extraData: string[]) {
       this.openDialog = true;
       this.loadingDialog = true;
-      await Promise.all(extraData.map((data) => axios.get(data))).then(
+      await Promise.all(extraData.map((data: string) => axios.get(data))).then(
         (extraData) => {
           this.extraData = extraData.map((data) => {
             const isResident = !!data.data.name;
@@ -190,7 +247,7 @@ export default {
       this.loadingDialog = false;
     },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
